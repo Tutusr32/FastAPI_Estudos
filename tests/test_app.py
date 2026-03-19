@@ -59,7 +59,6 @@ def test_update_user(client):
     }
 
 
-#Exercício 1 / Aula 3
 def test_update_user_not_found(client):
     response = client.put(
         '/users/999',
@@ -81,7 +80,6 @@ def test_delete_user(client):
     assert response.content == b''
 
 
-#Exercício 2 / Aula 3
 def test_delete_user_not_found(client):
     response = client.delete('/users/999')
 

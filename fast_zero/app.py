@@ -56,11 +56,3 @@ def delete_user(user_id: int):
         raise HTTPException(status_code=404, detail='Usuário não encontrado')
 
     database.pop(user_id - 1)
-
-
-@app.get('/users/{id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def exercicio(id: int):
-    if id > len(database) or id <= 0:
-        raise HTTPException(status_code=404, detail='Usuário não encontrado')
-
-    return database[id - 1]
