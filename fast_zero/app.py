@@ -1,21 +1,66 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException
+
+from .schemas import Message, UserDB, UserList, UserPublic, UserSchema
 
 app = FastAPI(title='API32')
+database = []
 
 
-@app.get('/', status_code=HTTPStatus.OK, response_class=HTMLResponse)
+@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
 def read_root():
-    return """
-    <html>
-    <head>
-        <title>Olá Mundo!</title>
-    </head>
-    <body>
+    return {'message': 'Olá Mundo!'}
 
-    <h1>Olá Mundo</h1>
 
-    </body>
-    </html>"""
+@app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
+def create_user(user: UserSchema):
+
+    user_with_id = UserDB(
+        **user.model_dump(),
+        id=len(database) + 1,
+    )
+
+    database.append(user_with_id)
+
+    return user_with_id
+
+
+@app.get('/users/', status_code=HTTPStatus.OK, response_model=UserList)
+def read_users():
+    return {'users': database}
+
+
+@app.put(
+    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
+)
+def update_user(user_id: int, user: UserSchema):
+
+    user_with_id = UserDB(
+        **user.model_dump(),
+        id=user_id,
+    )
+
+    if user_id > len(database) or user_id <= 0:
+        raise HTTPException(status_code=404, detail='Usuário não encontrado')
+
+    database[user_id - 1] = user_with_id
+
+    return user_with_id
+
+
+@app.delete('/users/{user_id}', status_code=HTTPStatus.NO_CONTENT)
+def delete_user(user_id: int):
+
+    if user_id > len(database) or user_id <= 0:
+        raise HTTPException(status_code=404, detail='Usuário não encontrado')
+
+    database.pop(user_id - 1)
+
+
+@app.get('/users/{id}', status_code=HTTPStatus.OK, response_model=UserPublic)
+def exercicio(id: int):
+    if id > len(database) or id <= 0:
+        raise HTTPException(status_code=404, detail='Usuário não encontrado')
+
+    return database[id - 1]
