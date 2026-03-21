@@ -49,10 +49,12 @@ def update_user(user_id: int, user: UserSchema):
     return user_with_id
 
 
-@app.delete('/users/{user_id}', status_code=HTTPStatus.NO_CONTENT)
+@app.delete(
+    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
+)
 def delete_user(user_id: int):
 
     if user_id > len(database) or user_id <= 0:
         raise HTTPException(status_code=404, detail='Usuário não encontrado')
 
-    database.pop(user_id - 1)
+    return database.pop(user_id - 1)
