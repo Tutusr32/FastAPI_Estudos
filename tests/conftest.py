@@ -17,29 +17,29 @@ def client():
 
 @pytest.fixture
 def session():
-    engine = create_engine('sqlite:///:memory:')
+    engine = create_engine('sqlite:///:memory:')  # banco isolado por teste
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
         yield session
 
-    table_registry.metadata.drop_all(engine)
+    table_registry.metadata.drop_all(engine)  # limpa após o teste
 
 
 @contextmanager
-def _mock_db_time(*, model, time=datetime(2026, 3, 29)):
+def _mock_db_time(*, model, time=datetime.now()):  # ATENCAO: datetime.now() avaliado uma vez no import
 
     def fake_time_hook(mapper, connection, target):
         if hasattr(target, 'created_at'):
-            target.created_at = time
+            target.created_at = time  # força o timestamp antes do INSERT
 
-    event.listen(model, 'before_insert', fake_time_hook)
+    event.listen(model, 'before_insert', fake_time_hook)  # registra o hook
 
     yield time
 
-    event.remove(model, 'before_insert', fake_time_hook)
+    event.remove(model, 'before_insert', fake_time_hook)  # remove após o bloco with
 
 
 @pytest.fixture
 def mock_db_time():
-    return _mock_db_time
+    return _mock_db_time  # retorna a função, não o resultado dela
