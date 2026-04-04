@@ -31,9 +31,7 @@ def read_users():
     return {'users': database}
 
 
-@app.put(
-    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
-)
+@app.put('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
 def update_user(user_id: int, user: UserSchema):
 
     user_with_id = UserDB(
@@ -49,9 +47,7 @@ def update_user(user_id: int, user: UserSchema):
     return user_with_id
 
 
-@app.delete(
-    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
-)
+@app.delete('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
 def delete_user(user_id: int):
 
     if user_id > len(database) or user_id <= 0:
