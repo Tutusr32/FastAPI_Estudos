@@ -1,5 +1,8 @@
 from http import HTTPStatus
 
+from sqlalchemy.orm import Session
+
+from fast_zero.database import get_session
 from fast_zero.schemas import UserPublic
 
 
@@ -72,6 +75,24 @@ def test_read_users_with_users(client, user):
     assert response.json() == {'users': [user_schema]}
 
 
+def test_get_user_should_return_not_found(client):
+    response = client.get('/users/999')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Usuário não encontrado'}
+
+
+def test_get_user(client, user):
+    response = client.get(f'/users/{user.id}')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'username': user.username,
+        'email': user.email,
+        'id': user.id,
+    }
+
+
 def test_update_user(client, user):
     client.post(
         '/users/', json={'username': 'arthur', 'email': 'arthur@example.com', 'password': '123'}
@@ -138,3 +159,15 @@ def test_delete_user_not_found(client):
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'Usuário não encontrado'}
+
+
+def test_get_session():
+    gen = get_session()
+    session = next(gen)
+
+    assert isinstance(session, Session)
+
+    try:
+        next(gen)
+    except StopIteration:
+        pass

@@ -61,6 +61,16 @@ def read_users(
     return {'users': users}
 
 
+@app.get('/users/{user_id}', response_model=UserPublic)
+def read_user_by_id(user_id: int, session: Session = Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
+
+    if not db_user:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado')
+
+    return db_user
+
+
 @app.put('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
 def update_user(user_id: int, user: UserSchema, session: Session = Depends(get_session)):
 
