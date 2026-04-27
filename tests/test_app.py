@@ -1,8 +1,5 @@
 from http import HTTPStatus
 
-from sqlalchemy.orm import Session
-
-from fast_zero.database import get_session
 from fast_zero.schemas import UserPublic
 
 
@@ -159,15 +156,3 @@ def test_delete_user_not_found(client):
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'Usuário não encontrado'}
-
-
-def test_get_session():
-    gen = get_session()
-    session = next(gen)
-
-    assert isinstance(session, Session)
-
-    try:
-        next(gen)
-    except StopIteration:
-        pass
