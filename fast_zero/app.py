@@ -87,13 +87,13 @@ def update_user(
     current_user: User = Depends(get_current_user),
 ):
 
-    if current_user.id != user_id:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões')
-
     db_user = session.get(User, user_id)
 
     if not db_user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado')
+
+    if current_user.id != user_id:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões')
 
     try:
         current_user.username = user.username
@@ -116,14 +116,13 @@ def delete_user(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-
-    if current_user.id != user_id:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões')
-
     db_user = session.get(User, user_id)
 
     if not db_user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado')
+
+    if current_user.id != user_id:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Sem permissões')
 
     session.delete(db_user)
     session.commit()

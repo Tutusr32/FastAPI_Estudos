@@ -113,6 +113,21 @@ def test_update_user_not_found(client, token):
         },
     )
 
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Usuário não encontrado'}
+
+
+def test_update_user_forbidden(client, token, other_user):
+    response = client.put(
+        f'/users/{other_user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'username': 'bob',
+            'email': 'bob@example.com',
+            'password': 'secret',
+        },
+    )
+
     assert response.status_code == HTTPStatus.FORBIDDEN
     assert response.json() == {'detail': 'Sem permissões'}
 
@@ -155,6 +170,16 @@ def test_delete_user_not_found(client, token):
         headers={'Authorization': f'Bearer {token}'},
     )
 
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Usuário não encontrado'}
+
+
+def test_delete_user_forbidden(client, token, other_user):
+    response = client.delete(
+        f'/users/{other_user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
     assert response.status_code == HTTPStatus.FORBIDDEN
     assert response.json() == {'detail': 'Sem permissões'}
 
@@ -168,3 +193,21 @@ def test_get_token(client, user):
     assert response.status_code == HTTPStatus.OK
     assert token['token_type'] == 'bearer'
     assert 'access_token' in token
+
+
+def test_get_token_invalid_email(client, user, other_user):
+    response = client.post(
+        '/token', data={'username': 'fantasma@example.com', 'password': user.clean_password}
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Email ou senha incorretos'}
+
+
+def test_get_token_verify_should_return_invalid(client, user, other_user):
+    response = client.post(
+        '/token', data={'username': user.email, 'password': 'senha_claramente_falsa'}
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Email ou senha incorretos'}

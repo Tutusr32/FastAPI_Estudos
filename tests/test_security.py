@@ -21,9 +21,31 @@ def test_jwt():
 
 
 def test_jwt_invalid_token(client):
+    response = client.delete('/users/1', headers={'Authorization': 'Bearer token-invalido'})
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Sem credenciais válidas'}
+
+
+def test_jwt_without_subject(client):
+    token = create_access_token({'test': 'test'})
+
     response = client.delete(
-        '/users/1', headers={'Authorization': 'Bearer token-invalido'}
-        )
+        '/users/1',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Sem credenciais válidas'}
+
+
+def test_jwt_without_user(client):
+    token = create_access_token({'sub': 'sem_user_@example.com'})
+
+    response = client.delete(
+        '/users/999',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {'detail': 'Sem credenciais válidas'}
