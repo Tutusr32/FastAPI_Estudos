@@ -85,10 +85,6 @@ def test_get_user(client, user):
 
 
 def test_update_user(client, user, token):
-    client.post(
-        '/users/', json={'username': 'arthur', 'email': 'arthur@example.com', 'password': '123'}
-    )
-
     response = client.put(
         '/users/1',
         headers={'Authorization': f'Bearer {token}'},
@@ -100,6 +96,11 @@ def test_update_user(client, user, token):
     )
 
     assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': user.id,
+        'username': 'bob',
+        'email': 'bob@example.com',
+    }
 
 
 def test_update_user_not_found(client, token):
@@ -134,7 +135,7 @@ def test_update_user_forbidden(client, token, other_user):
 
 def test_update_integrity_error(client, user, token):
     client.post(
-        '/users',
+        '/users/',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'fausto',
@@ -204,7 +205,7 @@ def test_get_token_invalid_email(client, user, other_user):
     assert response.json() == {'detail': 'Email ou senha incorretos'}
 
 
-def test_get_token_verify_should_return_invalid(client, user, other_user):
+def test_get_token_invalid_password(client, user, other_user):
     response = client.post(
         '/token', data={'username': user.email, 'password': 'senha_claramente_falsa'}
     )
