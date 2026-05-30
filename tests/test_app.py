@@ -196,7 +196,7 @@ def test_get_token(client, user):
     assert 'access_token' in token
 
 
-def test_get_token_invalid_email(client, user, other_user):
+def test_get_token_invalid_email(client, user):
     response = client.post(
         '/token', data={'username': 'fantasma@example.com', 'password': user.clean_password}
     )
@@ -205,7 +205,7 @@ def test_get_token_invalid_email(client, user, other_user):
     assert response.json() == {'detail': 'Email ou senha incorretos'}
 
 
-def test_get_token_invalid_password(client, user, other_user):
+def test_get_token_invalid_password(client, user):
     response = client.post(
         '/token', data={'username': user.email, 'password': 'senha_claramente_falsa'}
     )
