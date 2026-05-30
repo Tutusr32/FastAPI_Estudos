@@ -90,13 +90,3 @@ def token(client, user):
 
     return response.json()['access_token']
 
-
-@pytest.fixture
-def other_user(session):
-    user = User(username='other', email='other@test.com', password='123')
-
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-
-    return user
