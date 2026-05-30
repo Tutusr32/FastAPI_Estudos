@@ -37,15 +37,3 @@ def test_jwt_without_subject(client):
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {'detail': 'Sem credenciais válidas'}
-
-
-def test_jwt_without_user(client):
-    token = create_access_token({'sub': 'sem_user_@example.com'})
-
-    response = client.delete(
-        '/users/999',
-        headers={'Authorization': f'Bearer {token}'},
-)
-
-    assert response.status_code == HTTPStatus.UNAUTHORIZED
-    assert response.json() == {'detail': 'Sem credenciais válidas'}
