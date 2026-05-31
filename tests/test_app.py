@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from fast_zero.models import User
 from fast_zero.schemas import UserPublic
 
 
@@ -118,15 +119,17 @@ def test_update_user_not_found(client, token):
     assert response.json() == {'detail': 'Usuário não encontrado'}
 
 
-def test_update_user_forbidden(client, token, other_user):
+def test_update_user_forbidden(client, token, session):
+    other_user = User(username='bob', email='bob@example.com', password='123456')
+
+    session.add(other_user)
+    session.commit()
+    session.refresh(other_user)
+
     response = client.put(
         f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
-        json={
-            'username': 'bob',
-            'email': 'bob@example.com',
-            'password': 'secret',
-        },
+        json={'username': 'alice', 'email': 'alice@example.com', 'password': 'secret'},
     )
 
     assert response.status_code == HTTPStatus.FORBIDDEN
@@ -175,7 +178,17 @@ def test_delete_user_not_found(client, token):
     assert response.json() == {'detail': 'Usuário não encontrado'}
 
 
-def test_delete_user_forbidden(client, token, other_user):
+def test_delete_user_forbidden(client, token, session):
+    other_user = User(
+        username='bob',
+        email='bob@example.com',
+        password='123456',
+    )
+
+    session.add(other_user)
+    session.commit()
+    session.refresh(other_user)
+
     response = client.delete(
         f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
